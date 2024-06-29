@@ -14,6 +14,10 @@ struct Theme: Equatable {
     let color: Color
 }
 
+struct Card {
+    let isFaceUp = false
+}
+
 struct ContentView: View {
     // Define set of valid themes. These are used to generate buttons
     let vehicles = Theme(name: "Vehicles", cards: ["🚙","🚛","🚑","🚚"], image: "car", color: .red)
@@ -43,16 +47,35 @@ struct ContentView: View {
     }
     
     // Builds dynamic Grid of CardViews based on currently selected theme.
-    // TODO: EC3 Dynamic adaptive sizing
     var buildCards: some View {
         let deck = buildDeck(fromCards: currentTheme.cards)
 
-        return LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
+        // best effort dynamic sizing
+        let adaptiveMinimum = calculateAdaptiveMinimum(numCards: deck.count)
+        
+        return LazyVGrid(columns: [GridItem(.adaptive(minimum: adaptiveMinimum))]) {
             ForEach(0..<deck.count, id: \.self) { i in
-                CardView(content: deck[i], isFaceUp: false)
+                CardView(content: deck[i], isFaceUp: false, smallCard: adaptiveMinimum <= 50 ? true: false)
                     .aspectRatio(2/3, contentMode: .fit)
             }
         }.foregroundColor(currentTheme.color)
+    }
+    
+    func calculateAdaptiveMinimum(numCards: Int) -> CGFloat {
+        // numCards accounts for pairs, 30 cards -> 15 Pairs
+        switch numCards {
+        case 1...4:
+            120.0
+        case 6: // force 3x3
+            90.0
+        case 5...12:
+            80.0
+        case 13...30:
+            50.0
+        // anything over 15 cards is too large for phone
+        default:
+            80.0
+        }
     }
     
     // Builds list of theme selector buttons.
@@ -85,18 +108,13 @@ struct ContentView: View {
     }
     
     // Generates a new deck of cards including a pair of each provided value.
-    // Chooses a random subset of cards, unless 4 or less cards exist
+    // Chooses a random subset of cards, unless 2 or less cards exist
     func buildDeck(fromCards: [String]) -> [String] {
-        // TODO: Fix with Swift15
-//        let numCards =
-//        if fromCards.count <= 4 { fromCards.count }
-//        else { Int.random(in: 4...fromCards.count) }
-        
-        // If less than 4 cards, treat as minimum
+        // If less than 2 cards, treat as minimum
         // Otherwise select a random number of cards to use from 4 to card count
-        var numCards: Int
-        if fromCards.count <= 4 { numCards = fromCards.count }
-        else { numCards = Int.random(in: 4...fromCards.count) }
+        let numCards =
+            if fromCards.count <= 2 { fromCards.count }
+            else { Int.random(in: 2...fromCards.count) }
         
         // shuffle cards and take number of desired cards
         let subsetCards = Array(fromCards.shuffled()[0..<numCards])
@@ -112,6 +130,8 @@ struct ContentView: View {
 struct CardView: View {
     let content: String
     @State var isFaceUp = false
+    // render icon smaller
+    let smallCard: Bool
     
     var body: some View {
         return ZStack {
@@ -119,7 +139,7 @@ struct CardView: View {
             Group {
                 base.fill(.white)
                 base.strokeBorder(lineWidth: 2)
-                Text(content).font(.system(size: 64))
+                Text(content).font(.system(size: smallCard ? 48 : 64))
             }.opacity(isFaceUp ? 1 : 0)
             base.fill().opacity(isFaceUp ? 0 : 1)
         }.onTapGesture {
