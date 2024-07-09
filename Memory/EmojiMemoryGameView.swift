@@ -16,29 +16,17 @@ struct Theme: Equatable {
 
 struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel: EmojiMemoryGame
-      
-    // var activeThemes: [Theme]
-    // @State var currentTheme: Theme
-//    init() {
-//        // activeThemes = [vehicles, sports, weather]
-//        //currentTheme = activeThemes[0]
-//    }
     
     // Builds main body view
     var body: some View {
         VStack {
-            Text(
-                "Memorize!"
-            ).bold().font(.largeTitle)
             ScrollView {
                 cards
                     .animation(.default, value: viewModel.cards)
             }
-            Button("Shuffle") {
-                viewModel.shuffle()
-            }
-//            Spacer()
-//            themeSelectors()
+            Button("New Game") {
+                viewModel.createNewGame()
+            }.bold().font(.largeTitle)
         }
         .padding()
     }
@@ -115,34 +103,3 @@ struct EmojiMemoryGameView_Previews: PreviewProvider {
         EmojiMemoryGameView(viewModel: EmojiMemoryGame())
     }
 }
-
-
-//
-//    // Builds list of theme selector buttons.
-//    // restricted to themes listed in `activeThemes`
-//    func themeSelectors() -> some View {
-//        HStack {
-//            ForEach(0..<activeThemes.count, id: \.self) { i in
-//                let theme = activeThemes[i]
-//                themeChanger(toTheme: theme)
-//            }
-//        }.imageScale(.large)
-//        .font(.largeTitle)
-//    }
-    
-    // Button selector for updating current theme.
-//    func themeChanger(toTheme: Theme) -> some View {
-//        VStack {
-//            Button(action: {
-//                currentTheme = toTheme
-//            }, label: {
-//                Image(systemName: toTheme.image)
-//                    .foregroundColor(toTheme.color)
-//            }
-//            ).disabled(currentTheme == toTheme)
-//            .frame(maxWidth: .infinity)
-//            Text (
-//                toTheme.name
-//            ).bold().font(.body)
-//        }
-//    }
