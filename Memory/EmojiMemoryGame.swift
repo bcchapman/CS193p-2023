@@ -9,19 +9,19 @@ import SwiftUI
 
 // View Model
 class EmojiMemoryGame : ObservableObject {
-    private static let themes = [
-        Theme(name: "Vehicles", cards: ["🚙","🚛","🚑","🚚"], image: "car", color: .red),
-        Theme(name: "Sports", cards: ["⚽️","🏀","🏈","⚾️", "🏒","🏸"], image: "baseball", color: .green),
-        Theme(name: "Weather", cards: ["☀️","⚡️","❄️","🌪️","🌡️"], image: "cloud.bolt.rain.fill", color: .blue)
-    ]
-    
-    private static func createMemoryGame() -> MemoryGame<String> {
-        let theme = themes.randomElement()!
-        let cards = theme.cards
-        let numberOfPairs = max(2, Int.random(in:  2 ... theme.cards.count))
+    private static func createMemoryGame(withEmojis: [String]? = nil) -> MemoryGame<String> {
+        
+        // check for uninitialized game
+        guard let emojis = withEmojis else {
+            return MemoryGame(numberOfPairsOfCards: 0) {_ in 
+                ""
+            }
+        }
+        
+        let numberOfPairs = max(2, Int.random(in:  2 ... emojis.count))
         return MemoryGame(numberOfPairsOfCards: numberOfPairs) { pairIndex in
-            return if cards.indices.contains(pairIndex) {
-                cards[pairIndex]
+            return if emojis.indices.contains(pairIndex) {
+                emojis[pairIndex]
             } else {
                 "⚠️"
             }
@@ -34,13 +34,13 @@ class EmojiMemoryGame : ObservableObject {
         return model.cards
     }
     
-    // MARK: - Intents
-    func createNewGame() {
-        model = EmojiMemoryGame.createMemoryGame()
-        shuffle()
+    var score: Int {
+        return model.score
     }
     
-    func shuffle() {
+    // MARK: - Intents
+    func createNewGame(fromEmojis: [String]) {
+        model = EmojiMemoryGame.createMemoryGame(withEmojis: fromEmojis)
         model.shuffle()
     }
     
