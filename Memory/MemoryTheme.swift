@@ -12,5 +12,6 @@ struct MemoryTheme: Equatable {
     let cards: [String]
     let image: String
     let color: String
+    let numberOfPairs: Int
 }
 

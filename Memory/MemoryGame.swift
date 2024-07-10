@@ -11,13 +11,14 @@ import Foundation
 struct MemoryGame<CardContent> where CardContent: Equatable {
     private(set) var cards: Array<Card>
     private(set) var score = 0
+    private(set) var gameInProgress = false
     
     init(numberOfPairsOfCards: Int, cardContentFactory: (Int) -> CardContent) {
         cards = []
         
         if(numberOfPairsOfCards > 0) {
             // add numberOfPairsOfCards x 2 cards
-            for pairIndex in 0..<max(2, numberOfPairsOfCards) {
+            for pairIndex in 0..<numberOfPairsOfCards {
                 let content = cardContentFactory(pairIndex)
                 cards.append(Card(content:content, id: "\(pairIndex+1)a"))
                 cards.append(Card(content: content, id: "\(pairIndex+1)b"))
@@ -31,6 +32,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         set { cards.indices.forEach{ cards[$0].isFaceUp = (newValue == $0) } }
     }
     
+    // returns true if a match was made
     mutating func choose(_ card: Card) {
         if let chosenIndex = cards.firstIndex(where: { $0.id == card.id }) {
             // only choose if card is not yet chosen or matched
@@ -55,6 +57,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                     // mark hasBeenSeen after scoring
                     cards[potentialMatchIndex].hasBeenSeen = true
                     cards[chosenIndex].hasBeenSeen = true
+                    
                     // FIXME: Hide match after timeout
                 } else { // no selected card
                     // set selected card
@@ -68,6 +71,10 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     
     mutating func shuffle() {
         cards.shuffle()
+    }
+    
+    mutating func toggleGameStatus() {
+        gameInProgress = !gameInProgress
     }
     
     struct Card: Equatable, Identifiable, CustomDebugStringConvertible {

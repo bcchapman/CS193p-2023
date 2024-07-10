@@ -15,6 +15,11 @@ struct EmojiMemoryGameView: View {
     var body: some View {
         VStack {
             HStack {
+                Button("X") {
+                    viewModel.cancelGame()
+                } .frame(maxWidth: .infinity, alignment: .trailing).padding().bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+            }.opacity(viewModel.gameInProgress ? 1 : 0)
+            HStack {
                 Image(systemName: memoryTheme.image)
                 Text (
                     memoryTheme.name
@@ -26,13 +31,17 @@ struct EmojiMemoryGameView: View {
                 cards
                     .animation(.default, value: viewModel.cards)
             }
-            Button("New Game") {
-                memoryTheme.updateTheme()
-                viewModel.createNewGame(fromEmojis: memoryTheme.emojis)
-            }.bold().font(.largeTitle)
-            Text(
-                "Score: \(viewModel.score)"
-            ).bold().font(.title)
+            if !viewModel.gameInProgress {
+                Button("New Game") {
+                    memoryTheme.updateTheme()
+                    viewModel.createNewGame(withEmojis: memoryTheme.emojis, withPairCount: memoryTheme.numberOfPairs)
+                }.bold().font(.largeTitle)
+            }
+            if viewModel.gameInProgress {
+                Text(
+                    "Score: \(viewModel.score)"
+                ).bold().font(.largeTitle)
+            }
         }
         .padding()
     }

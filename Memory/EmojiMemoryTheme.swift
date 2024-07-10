@@ -8,20 +8,17 @@ import SwiftUI
 
 // ViewModel
 class EmojiMemoryTheme : ObservableObject {
-    // TODO: add number of pairs to show
-    // if number of pairs < number of cards, randomly select
-    // if number of pairs >= number of cards use all at least once, then randomly select
-    private static func createMemoryTheme() -> MemoryTheme {
+    private static func fetchRandomTheme() -> MemoryTheme {
         let themes = [
-            MemoryTheme(name: "Vehicles", cards: ["🚙","🚛","🚑","🚚"], image: "car", color: "red"),
-            MemoryTheme(name: "Sports", cards: ["⚽️","🏀","🏈","⚾️", "🏒","🏸"], image: "baseball", color: "green"),
-            MemoryTheme(name: "Weather", cards: ["☀️","⚡️","❄️","🌪️","🌡️"], image: "cloud.bolt.rain.fill", color: "blue")
+            MemoryTheme(name: "Vehicles", cards: ["🚙","🚛","🚑","🚚"], image: "car", color: "red", numberOfPairs: 4),
+            MemoryTheme(name: "Sports", cards: ["⚽️","🏀","🏈","⚾️", "🏒","🏸"], image: "baseball", color: "green", numberOfPairs: 6),
+            MemoryTheme(name: "Weather", cards: ["☀️","⚡️","❄️","🌪️","🌡️"], image: "cloud.bolt.rain.fill", color: "blue", numberOfPairs: 6)
         ]
         // force unwrap, we know we have at least one
         return themes.randomElement()!
     }
     
-    @Published private var model = createMemoryTheme()
+    @Published private var model = fetchRandomTheme()
     
     var name: String {
         return model.name
@@ -52,8 +49,12 @@ class EmojiMemoryTheme : ObservableObject {
         return model.image
     }
     
+    var numberOfPairs: Int {
+        return model.numberOfPairs
+    }
+    
     // MARK: - Intents
     func updateTheme() {
-        model = EmojiMemoryTheme.createMemoryTheme()
+        model = EmojiMemoryTheme.fetchRandomTheme()
     }
 }

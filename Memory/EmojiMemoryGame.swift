@@ -9,17 +9,16 @@ import SwiftUI
 
 // View Model
 class EmojiMemoryGame : ObservableObject {
-    private static func createMemoryGame(withEmojis: [String]? = nil) -> MemoryGame<String> {
-        
+    
+    private static func createMemoryGame(emojis: [String], pairCount: Int) -> MemoryGame<String> {
         // check for uninitialized game
-        guard let emojis = withEmojis else {
-            return MemoryGame(numberOfPairsOfCards: 0) {_ in 
+        if pairCount == 0  {
+            return MemoryGame(numberOfPairsOfCards: 0) {_ in
                 ""
             }
         }
         
-        let numberOfPairs = max(2, Int.random(in:  2 ... emojis.count))
-        return MemoryGame(numberOfPairsOfCards: numberOfPairs) { pairIndex in
+        return MemoryGame(numberOfPairsOfCards: pairCount) { pairIndex in
             return if emojis.indices.contains(pairIndex) {
                 emojis[pairIndex]
             } else {
@@ -28,10 +27,14 @@ class EmojiMemoryGame : ObservableObject {
         }
     }
     
-    @Published private var model = createMemoryGame()
+    @Published private var model = createMemoryGame(emojis: [], pairCount: 0)
     
     var cards: Array<MemoryGame<String>.Card> {
         return model.cards
+    }
+    
+    var gameInProgress: Bool {
+        return model.gameInProgress
     }
     
     var score: Int {
@@ -39,9 +42,23 @@ class EmojiMemoryGame : ObservableObject {
     }
     
     // MARK: - Intents
-    func createNewGame(fromEmojis: [String]) {
-        model = EmojiMemoryGame.createMemoryGame(withEmojis: fromEmojis)
+    func createNewGame(withEmojis: [String], withPairCount: Int) {
+        var fullEmojis = withEmojis.shuffled()
+        
+        // while we don't have enough emojis, add a random element
+        while fullEmojis.count < withPairCount {
+            fullEmojis.append(withEmojis.randomElement()!)
+        }
+        
+        model = EmojiMemoryGame.createMemoryGame(emojis: fullEmojis, pairCount: withPairCount)
         model.shuffle()
+        
+        model.toggleGameStatus()
+    }
+    
+    func cancelGame() {
+        model.toggleGameStatus()
+        model = EmojiMemoryGame.createMemoryGame(emojis: [], pairCount: 0)
     }
     
     func choose(_ card: MemoryGame<String>.Card) {
