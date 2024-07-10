@@ -12,7 +12,10 @@ class EmojiMemoryTheme : ObservableObject {
         let themes = [
             MemoryTheme(name: "Vehicles", cards: ["🚙","🚛","🚑","🚚"], image: "car", color: "red", numberOfPairs: 4),
             MemoryTheme(name: "Sports", cards: ["⚽️","🏀","🏈","⚾️", "🏒","🏸"], image: "baseball", color: "green", numberOfPairs: 6),
-            MemoryTheme(name: "Weather", cards: ["☀️","⚡️","❄️","🌪️","🌡️"], image: "cloud.bolt.rain.fill", color: "blue", numberOfPairs: 6)
+            MemoryTheme(name: "Weather", cards: ["☀️","⚡️","❄️","🌪️","🌡️"], image: "cloud.bolt.rain.fill", color: "blue", numberOfPairs: 6),
+            MemoryTheme(name: "Fruit", cards: ["🍏","🍎","🍐","🍊","🍋","🍋‍🟩"], image: "fork.knife.circle", color: "green", numberOfPairs: 6),
+            MemoryTheme(name :"Animals", cards: ["🐶","🐱","🐭","🐹","🐰"], image: "pawprint.fill", color: "brown", numberOfPairs: 5),
+            MemoryTheme(name: "Flags", cards: ["🇦🇹","🇧🇪","🇧🇯","🏴‍☠️","🇨🇺","🇨🇿"], image: "flag.fill", color: "red", numberOfPairs: 6)
         ]
         // force unwrap, we know we have at least one
         return themes.randomElement()!
@@ -40,6 +43,8 @@ class EmojiMemoryTheme : ObservableObject {
                 .red
         case "yellow":
                 .yellow
+        case "brown":
+                .brown
         default:
             .orange
         }
