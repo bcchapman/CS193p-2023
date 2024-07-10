@@ -10,15 +10,13 @@ import SwiftUI
 // View Model
 class EmojiMemoryGame : ObservableObject {
     
-    private static func createMemoryGame(emojis: [String], pairCount: Int) -> MemoryGame<String> {
+    private static func createMemoryGame(emojis: [String], pairCount: Int, onMatchAttemptCompleteDo: Optional< () -> Void>) -> MemoryGame<String> {
         // check for uninitialized game
         if pairCount == 0  {
-            return MemoryGame(numberOfPairsOfCards: 0) {_ in
-                ""
-            }
+            return MemoryGame()
         }
         
-        return MemoryGame(numberOfPairsOfCards: pairCount) { pairIndex in
+        return MemoryGame(numberOfPairsOfCards: pairCount, onMatchAttemptCompleteDo: onMatchAttemptCompleteDo ?? nil) { pairIndex in
             return if emojis.indices.contains(pairIndex) {
                 emojis[pairIndex]
             } else {
@@ -27,7 +25,7 @@ class EmojiMemoryGame : ObservableObject {
         }
     }
     
-    @Published private var model = createMemoryGame(emojis: [], pairCount: 0)
+    @Published private var model = createMemoryGame(emojis: [], pairCount: 0, onMatchAttemptCompleteDo: nil)
     
     var cards: Array<MemoryGame<String>.Card> {
         return model.cards
@@ -35,6 +33,13 @@ class EmojiMemoryGame : ObservableObject {
     
     var gameInProgress: Bool {
         return model.gameInProgress
+    }
+    
+    // game is complete when no more unmatched cards
+    var gameComplete: Bool {
+        return !cards.contains(where: {
+            !$0.isMatched
+        })
     }
     
     var score: Int {
@@ -50,15 +55,21 @@ class EmojiMemoryGame : ObservableObject {
             fullEmojis.append(withEmojis.randomElement()!)
         }
         
-        model = EmojiMemoryGame.createMemoryGame(emojis: fullEmojis, pairCount: withPairCount)
+        model = EmojiMemoryGame.createMemoryGame(emojis: fullEmojis, pairCount: withPairCount, onMatchAttemptCompleteDo: onMatchAttemptComplete)
         model.shuffle()
         
         model.toggleGameStatus()
     }
     
+    func onMatchAttemptComplete() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+            self.model.clearMatch()
+        }
+    }
+    
     func cancelGame() {
         model.toggleGameStatus()
-        model = EmojiMemoryGame.createMemoryGame(emojis: [], pairCount: 0)
+        model = EmojiMemoryGame.createMemoryGame(emojis: [], pairCount: 0, onMatchAttemptCompleteDo: nil)
     }
     
     func choose(_ card: MemoryGame<String>.Card) {

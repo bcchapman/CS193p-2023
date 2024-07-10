@@ -12,9 +12,18 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     private(set) var cards: Array<Card>
     private(set) var score = 0
     private(set) var gameInProgress = false
+    private(set) var onMatchAttemptComplete: Optional<(() -> Void)> = nil
     
-    init(numberOfPairsOfCards: Int, cardContentFactory: (Int) -> CardContent) {
+    // keep track of last pair selection
+    private var lastPair: (Int, Int)?
+    
+    init() {
         cards = []
+    }
+    
+    init(numberOfPairsOfCards: Int, onMatchAttemptCompleteDo: Optional<() -> Void>, cardContentFactory: (Int) -> CardContent) {
+        cards = []
+        onMatchAttemptComplete = onMatchAttemptCompleteDo
         
         if(numberOfPairsOfCards > 0) {
             // add numberOfPairsOfCards x 2 cards
@@ -58,7 +67,10 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                     cards[potentialMatchIndex].hasBeenSeen = true
                     cards[chosenIndex].hasBeenSeen = true
                     
-                    // FIXME: Hide match after timeout
+                    lastPair = (potentialMatchIndex, chosenIndex)
+                    if let onMatchCallback = onMatchAttemptComplete {
+                        onMatchCallback()
+                    }
                 } else { // no selected card
                     // set selected card
                     indexOfSelectedCard = chosenIndex
@@ -77,9 +89,17 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         gameInProgress = !gameInProgress
     }
     
+    // force current match attempt to reset
+    mutating func clearMatch() {
+        if lastPair != nil {
+            cards[lastPair!.0].isFaceUp = false
+            cards[lastPair!.1].isFaceUp = false
+        }
+    }
+    
     struct Card: Equatable, Identifiable, CustomDebugStringConvertible {
         var debugDescription: String {
-            "\(id): \(content) \(hasBeenSeen ? "seen" : "not seen") \(isFaceUp ? "up" : "down") \(isMatched ? " matched" : "")"
+            "\(id): \(content) \(hasBeenSeen ? "seen" : "not seen") \(isFaceUp ? "up" : "down") \(isMatched ? " matched" : "not matched")"
         }
         
         let content: CardContent

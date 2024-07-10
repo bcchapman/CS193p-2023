@@ -19,14 +19,17 @@ struct EmojiMemoryGameView: View {
                     viewModel.cancelGame()
                 } .frame(maxWidth: .infinity, alignment: .trailing).padding().bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
             }.opacity(viewModel.gameInProgress ? 1 : 0)
-            HStack {
-                Image(systemName: memoryTheme.image)
-                Text (
-                    memoryTheme.name
-                )
-                Image(systemName: memoryTheme.image)
-            }.bold().font(.largeTitle)
-                .opacity(viewModel.cards.count > 0 ? 1 : 0)
+            if !viewModel.gameComplete {
+                HStack {
+                    Image(systemName: memoryTheme.image)
+                    Text (
+                        memoryTheme.name
+                    )
+                    Image(systemName: memoryTheme.image)
+                }.bold().font(.largeTitle)
+            } else if viewModel.gameInProgress {
+                Text("You Win!").bold().font(.largeTitle)
+            }
             ScrollView {
                 cards
                     .animation(.default, value: viewModel.cards)
