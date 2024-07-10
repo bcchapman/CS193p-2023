@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import EffectsLibrary
 
 struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel: EmojiMemoryGame
@@ -30,9 +31,18 @@ struct EmojiMemoryGameView: View {
             } else if viewModel.gameInProgress {
                 Text("You Win!").bold().font(.largeTitle)
             }
-            ScrollView {
-                cards
-                    .animation(.default, value: viewModel.cards)
+            if !viewModel.gameComplete {
+                ScrollView {
+                    cards
+                        .animation(.default, value: viewModel.cards)
+                }
+            }
+            if viewModel.gameComplete && viewModel.gameInProgress {
+                FireworksView (
+                    config: FireworksConfig(
+                        intensity: .high
+                    )
+                ).preferredColorScheme(.dark)
             }
             if !viewModel.gameInProgress {
                 Button("New Game") {

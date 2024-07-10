@@ -11,6 +11,7 @@
 		5E91F1792C3121BC007E290C /* MemoryGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E91F1782C3121BC007E290C /* MemoryGame.swift */; };
 		5E91F1CB2C3E31C0007E290C /* EmojiMemoryTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E91F1C92C3E31C0007E290C /* EmojiMemoryTheme.swift */; };
 		5E91F1CC2C3E31C0007E290C /* MemoryTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E91F1CA2C3E31C0007E290C /* MemoryTheme.swift */; };
+		5E91F1CF2C3EF21C007E290C /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 5E91F1CE2C3EF21C007E290C /* EffectsLibrary */; };
 		5EA093B32C2D1F91001D01BC /* MemoryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA093B22C2D1F91001D01BC /* MemoryApp.swift */; };
 		5EA093B52C2D1F91001D01BC /* EmojiMemoryGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA093B42C2D1F91001D01BC /* EmojiMemoryGameView.swift */; };
 		5EA093B72C2D1F93001D01BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5EA093B62C2D1F93001D01BC /* Assets.xcassets */; };
@@ -59,6 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5E91F1CF2C3EF21C007E290C /* EffectsLibrary in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -155,6 +157,9 @@
 			dependencies = (
 			);
 			name = Memory;
+			packageProductDependencies = (
+				5E91F1CE2C3EF21C007E290C /* EffectsLibrary */,
+			);
 			productName = Memory;
 			productReference = 5EA093AF2C2D1F91001D01BC /* Memory.app */;
 			productType = "com.apple.product-type.application";
@@ -227,6 +232,9 @@
 				Base,
 			);
 			mainGroup = 5EA093A62C2D1F91001D01BC;
+			packageReferences = (
+				5E91F1CD2C3EF13B007E290C /* XCRemoteSwiftPackageReference "effects-library" */,
+			);
 			productRefGroup = 5EA093B02C2D1F91001D01BC /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -599,6 +607,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5E91F1CD2C3EF13B007E290C /* XCRemoteSwiftPackageReference "effects-library" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/GetStream/effects-library";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5E91F1CE2C3EF21C007E290C /* EffectsLibrary */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5E91F1CD2C3EF13B007E290C /* XCRemoteSwiftPackageReference "effects-library" */;
+			productName = EffectsLibrary;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5EA093A72C2D1F91001D01BC /* Project object */;
 }
