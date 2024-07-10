@@ -7,34 +7,38 @@
 
 import SwiftUI
 
-struct Theme: Equatable {
-    let name: String
-    let cards: [String]
-    let image: String
-    let color: Color
-}
-
 struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel: EmojiMemoryGame
+    @ObservedObject var memoryTheme: EmojiMemoryTheme
     
     // Builds main body view
     var body: some View {
         VStack {
+            HStack {
+                Image(systemName: memoryTheme.image)
+                Text (
+                    memoryTheme.name
+                )
+                Image(systemName: memoryTheme.image)
+            }.bold().font(.largeTitle)
+                .opacity(viewModel.cards.count > 0 ? 1 : 0)
             ScrollView {
                 cards
                     .animation(.default, value: viewModel.cards)
             }
             Button("New Game") {
-                viewModel.createNewGame()
+                memoryTheme.updateTheme()
+                viewModel.createNewGame(fromEmojis: memoryTheme.emojis)
             }.bold().font(.largeTitle)
+            Text(
+                "Score: \(viewModel.score)"
+            ).bold().font(.title)
         }
         .padding()
     }
     
     // Builds dynamic Grid of CardViews based on currently selected theme.
     var cards: some View {
-        // let deck = buildDeck(fromCards: currentTheme.cards)
-
         // best effort dynamic sizing
         let adaptiveMinimum = calculateAdaptiveMinimum(numCards: viewModel.cards.count)
         
@@ -48,8 +52,7 @@ struct EmojiMemoryGameView: View {
                     }
             }
         }
-        .foregroundColor(.orange) // FIXME: improvement!
-        // .foregroundColor(currentTheme.color)
+        .foregroundColor(memoryTheme.color)
     }
     
     func calculateAdaptiveMinimum(numCards: Int) -> CGFloat {
@@ -100,6 +103,6 @@ struct CardView: View {
 
 struct EmojiMemoryGameView_Previews: PreviewProvider {
     static var previews: some View {
-        EmojiMemoryGameView(viewModel: EmojiMemoryGame())
+        EmojiMemoryGameView(viewModel: EmojiMemoryGame(), memoryTheme: EmojiMemoryTheme())
     }
 }

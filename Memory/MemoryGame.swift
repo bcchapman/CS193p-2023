@@ -7,18 +7,22 @@
 
 import Foundation
 
+// Model
 struct MemoryGame<CardContent> where CardContent: Equatable {
     private(set) var cards: Array<Card>
+    private(set) var score = 0
     
     init(numberOfPairsOfCards: Int, cardContentFactory: (Int) -> CardContent) {
         cards = []
-        // add numberOfPairsOfCards x 2 cards
-        for pairIndex in 0..<max(2, numberOfPairsOfCards) {
-            let content = cardContentFactory(pairIndex)
-            cards.append(Card(content:content, id: "\(pairIndex+1)a"))
-            cards.append(Card(content: content, id: "\(pairIndex+1)b"))
+        
+        if(numberOfPairsOfCards > 0) {
+            // add numberOfPairsOfCards x 2 cards
+            for pairIndex in 0..<max(2, numberOfPairsOfCards) {
+                let content = cardContentFactory(pairIndex)
+                cards.append(Card(content:content, id: "\(pairIndex+1)a"))
+                cards.append(Card(content: content, id: "\(pairIndex+1)b"))
+            }
         }
-        //cards.shuffle()
     }
     
     // which card has been flipped and not yet evaluated
@@ -37,7 +41,20 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                     if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                         cards[chosenIndex].isMatched = true
                         cards[potentialMatchIndex].isMatched = true
+                        
+                        // increase score
+                        score += 2
+                    } else {
+                        if cards[chosenIndex].hasBeenSeen {
+                            score -= 1
+                        }
+                        if cards[potentialMatchIndex].hasBeenSeen {
+                            score -= 1
+                        }
                     }
+                    // mark hasBeenSeen after scoring
+                    cards[potentialMatchIndex].hasBeenSeen = true
+                    cards[chosenIndex].hasBeenSeen = true
                     // FIXME: Hide match after timeout
                 } else { // no selected card
                     // set selected card
@@ -55,10 +72,11 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     
     struct Card: Equatable, Identifiable, CustomDebugStringConvertible {
         var debugDescription: String {
-            "\(id): \(content) \(isFaceUp ? "up" : "down") \(isMatched ? " matched" : "")"
+            "\(id): \(content) \(hasBeenSeen ? "seen" : "not seen") \(isFaceUp ? "up" : "down") \(isMatched ? " matched" : "")"
         }
         
         let content: CardContent
+        var hasBeenSeen = false
         var isFaceUp = false
         var isMatched = false
         
