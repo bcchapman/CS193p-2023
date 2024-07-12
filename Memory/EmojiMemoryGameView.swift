@@ -12,98 +12,88 @@ struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel: EmojiMemoryGame
     @ObservedObject var memoryTheme: EmojiMemoryTheme
     
+    private let aspectRatio: CGFloat = 2/3
+    
     // Builds main body view
     var body: some View {
         VStack {
-            HStack {
-                Button("X") {
-                    viewModel.cancelGame()
-                } .frame(maxWidth: .infinity, alignment: .trailing).padding().bold().font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-            }.opacity(viewModel.gameInProgress ? 1 : 0)
-            if !viewModel.gameComplete {
-                HStack {
-                    Image(systemName: memoryTheme.image)
-                    Text (
-                        memoryTheme.name
-                    )
-                    Image(systemName: memoryTheme.image)
-                }.bold().font(.largeTitle)
-            } else if viewModel.gameInProgress {
-                Text("You Win!").bold().font(.largeTitle)
-            }
-            if !viewModel.gameComplete {
-                ScrollView {
-                    cards
-                        .animation(.default, value: viewModel.cards)
-                }
-            }
-            if viewModel.gameComplete && viewModel.gameInProgress {
-                FireworksView (
-                    config: FireworksConfig(
-                        intensity: .high
-                    )
-                ).preferredColorScheme(.dark)
-            }
-            if !viewModel.gameInProgress {
-                Button("New Game") {
-                    memoryTheme.updateTheme()
-                    viewModel.createNewGame(withEmojis: memoryTheme.emojis, withPairCount: memoryTheme.numberOfPairs)
-                }.bold().font(.largeTitle)
-            }
-            if viewModel.gameInProgress {
-                Text(
-                    "Score: \(viewModel.score)"
-                ).bold().font(.largeTitle)
-            }
+            ExitButton (
+                onExit: { viewModel.cancelGame() },
+                showButton: { viewModel.gameInProgress }
+            )
+            title
+            cards
+            gameControls
         }
         .padding()
+        .edgesIgnoringSafeArea([.top])
     }
     
     // Builds dynamic Grid of CardViews based on currently selected theme.
-    var cards: some View {
-        // best effort dynamic sizing
-        let adaptiveMinimum = calculateAdaptiveMinimum(numCards: viewModel.cards.count)
-        
-        return LazyVGrid(columns: [GridItem(.adaptive(minimum: adaptiveMinimum), spacing: 0)], spacing: 0) {
-            ForEach(viewModel.cards) { card in
-                CardView(card, smallCard: adaptiveMinimum <= 50 ? true: false)
-                    .aspectRatio(2/3, contentMode: .fit)
+    @ViewBuilder
+    private var cards: some View {
+        if !viewModel.gameComplete {
+            AspectVGrid(viewModel.cards, aspectRatio: aspectRatio) { card in
+                CardView(card)
                     .padding(4)
                     .onTapGesture {
                         viewModel.choose(card)
                     }
             }
+            .foregroundColor(memoryTheme.color)
+            .animation(.default, value: viewModel.cards)
         }
-        .foregroundColor(memoryTheme.color)
     }
     
-    func calculateAdaptiveMinimum(numCards: Int) -> CGFloat {
-        // numCards accounts for pairs, 30 cards -> 15 Pairs
-        switch numCards {
-        case 1...4:
-            120.0
-        case 6: // force 3x3
-            90.0
-        case 5...12:
-            80.0
-        case 13...30:
-            50.0
-        // anything over 15 cards is too large for phone
-        default:
-            80.0
+    // Build title view
+    private var title: some View {
+        return HStack {
+            if !viewModel.gameComplete {
+                Image(systemName: memoryTheme.image)
+                Text (
+                    memoryTheme.name
+                )
+                Image(systemName: memoryTheme.image)
+            } else if viewModel.gameInProgress {
+                Text("You Win!")
+            }
+        }.bold().font(.largeTitle)
+    }
+    
+    // builds new game button, current score display and success screen
+    // depending on state of play
+    @ViewBuilder
+    private var gameControls: some View {
+        if viewModel.gameInProgress {
+            if viewModel.gameComplete {
+                if viewModel.gameComplete {
+                    FireworksView (
+                        config: FireworksConfig(
+                            intensity: .high
+                        )
+                    ).preferredColorScheme(.dark)
+                }
+            }
+            else {
+                Text(
+                    "Score: \(viewModel.score)"
+                ).bold().font(.largeTitle)
+            }
+        }
+        else {
+            Button("New Game") {
+                memoryTheme.updateTheme()
+                viewModel.createNewGame(withEmojis: memoryTheme.emojis, withPairCount: memoryTheme.numberOfPairs)
+            }.bold().font(.largeTitle)
         }
     }
 }
 
-struct CardView: View {
+private struct CardView: View {
     let card: MemoryGame<String>.Card
     
-    // render icon smaller
-    let smallCard: Bool
-    
-    init(_ card: MemoryGame<String>.Card, smallCard: Bool) {
+    init(_ card: MemoryGame<String>.Card) {
         self.card = card
-        self.smallCard = smallCard
     }
     
     var body: some View {
@@ -113,8 +103,7 @@ struct CardView: View {
                 base.fill(.white)
                 base.strokeBorder(lineWidth: 2)
                 Text(card.content)
-                    //.font(.system(size: 200))
-                    .font(.system(size: smallCard ? 48 : 64))
+                    .font(.system(size: 200))
                     .minimumScaleFactor(0.01)
                     .aspectRatio(1, contentMode: .fit)
             }.opacity(card.isFaceUp ? 1 : 0)
